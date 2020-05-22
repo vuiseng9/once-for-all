@@ -1,0 +1,51 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Download ofa specialized network",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/",
+            "program": "download_ofa_specialized.py*",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "cpu_lat@17ms_top1@75.7_finetune@25",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/",
+            "program": "eval_specialized_net.py",
+            "args": [
+                "--net", "cpu_lat@17ms_top1@75.7_finetune@25",
+                "--path", "/data/dataset/imagenet/ilsvrc2012/torchvision/"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "cpu_lat@10ms_top1@71.1_finetune@25",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/",
+            "program": "eval_specialized_net.py",
+            "args": [
+                "--net", "cpu_lat@10ms_top1@71.1_finetune@25",
+                "--path", "/data/dataset/imagenet/ilsvrc2012/torchvision/"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "v100_gpu64@11ms_top1@76.1_finetune@25",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/",
+            "program": "eval_specialized_net.py",
+            "args": [
+                "--net", "v100_gpu64@11ms_top1@76.1_finetune@25",
+                "--path", "/data/dataset/imagenet/ilsvrc2012/torchvision/"
+            ],
+            "env": {"CUDA_VISIBLE_DEVICES":"0"},
+            "console": "integratedTerminal"
+        }
+    ]
+}
