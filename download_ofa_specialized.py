@@ -1,5 +1,5 @@
 # Download Specialized OFA
-
+# you could get the full list of specialized network id in eval_specialized_net.py
 hw2ofa={
     "XEON_BS1":
     [
