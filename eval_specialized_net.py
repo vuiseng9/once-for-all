@@ -16,6 +16,14 @@ from torchvision import transforms, datasets
 from ofa.utils import AverageMeter, accuracy
 from ofa.model_zoo import ofa_specialized
 
+from nncf import NNCFConfig
+try:
+    import jstyleson as json
+except ImportError:
+    import json
+from nncf.initialization import register_default_init_args, default_criterion_fn
+from nncf import create_compressed_model
+
 specialized_network_list = [
     ################# FLOPs #################
     'flops@595M_top1@80.0_finetune@75',
@@ -123,6 +131,12 @@ parser.add_argument(
     help='OFA specialized networks: ' +
     ' | '.join(specialized_network_list) +
     ' (default: pixel1_lat@143ms_top1@80.1_finetune@75)')
+parser.add_argument(
+        "--nncf-quantize",
+        dest="quantize",
+        help="quantize network with nncf",
+        action="store_true",
+    )
 
 args = parser.parse_args()
 if args.gpu == 'all':
@@ -162,11 +176,38 @@ data_loader = torch.utils.data.DataLoader(
     drop_last=False,
 )
 
-net = torch.nn.DataParallel(net).cuda()
+if args.gpu != 'all':
+    net = net.cuda()
+else:
+    net = torch.nn.DataParallel(net).cuda()
+
 cudnn.benchmark = True
 criterion = nn.CrossEntropyLoss().cuda()
 
 net.eval()
+
+if args.quantize is True:
+    nncf_config = {
+        'input_info': {
+            'sample_size': [1, 3, image_size, image_size]
+        },
+        "device": next(net.parameters()).device,
+        "compression": {
+            "algorithm": "quantization",
+            "initializer": {
+                "range": {
+                    "num_init_samples": 850
+                }
+            }
+        }
+    }
+
+    nncf_config = NNCFConfig.from_dict(nncf_config)
+    nncf_config = register_default_init_args(
+        nncf_config, data_loader, device=nncf_config.get('device'))
+
+    compression_ctrl, model = create_compressed_model(net, nncf_config)
+
 losses = AverageMeter()
 top1 = AverageMeter()
 top5 = AverageMeter()
